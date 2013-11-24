@@ -6,10 +6,10 @@ import System.Environment
 import Data.Char
 import Data.List
 import Data.Either
-import qualified Graphics.UI.Gtk 
---import Graphics.UI.Gtk.Glade
+import Graphics.UI.Gtk 
+import Graphics.UI.Gtk.Glade
 
-{-
+
 data GUI = GUI {
 	mainWin :: Window,
 	button1 :: Button,
@@ -21,7 +21,7 @@ data GUI = GUI {
 	button7 :: Button,
 	button8 :: Button,
 	button9 :: Button}
--}
+
 
 
 
@@ -53,9 +53,9 @@ dispatchInit = do
 
 
 newExecute "run" b = run b
-newExecute "add" b = add b
+newExecute "add" b = add' b
 newExecute "view" b = view b
-newExecute "remove" b = remove b
+newExecute "remove" b = remove' b
 newExecute _ b = incorrectArgs (show b)
 
 
@@ -78,45 +78,26 @@ run _ = incorrectArgs "run"
 interactive :: IO ()
 interactive = do
 	putStrLn "qsrun is running in interactive mode! Ctrl-C to exit.\n"
-
 	
 	putStrLn "Choose an operation: add, view, remove or run.\n"
 	opName <- getLine
-
-	putStrLn "\nPlease enter a filename."
+        putStrLn "\nPlease enter a filename."
 	fileName <- getLine
-
-        let   add = do
-	         putStrLn ""
+	let view' = do 
 	         view ([fileName])
-                 putStrLn "\nWhat do you want to add?"
-	         args <- getLine
-	         newExecute opName (fileName:[args])
-	      remove = do
-	         putStrLn "What do you want to remove?\n"
-		 view ([fileName]) 
-	         args <- getLine
-	         newExecute opName (fileName:[args])
-	      run = do
-	         view ([fileName]) 
-	         putStrLn "What do you want to run?"
-                 args <- getLine
-	         newExecute opName (fileName:[args])
-	  in
-	     case (opName) of
-	        "view"   -> view ([fileName])
-	        "add"    -> add
-		"remove" -> remove
-		"run"    -> run
+	         error ("Finished printing " ++ fileName)
+          in
+	    case (opName) of
+	       "view" -> view'
+        view ([fileName])
+        putStrLn ("What do you want to " ++ opName)
+        args <- fmap lines getLine
+        newExecute opName (fileName:args)
 
 
-{-Separate else statements eg listing commands of file before choosing what to do-} 
-
-	
-
-add :: [String] -> IO ()
-add [fileName, qsItem] = appendFile fileName (qsItem ++ "\n")
-add _ = incorrectArgs "add" 
+add' :: [String] -> IO ()
+add' [fileName, qsItem] = appendFile fileName (qsItem ++ "\n")
+add' _ = incorrectArgs "add" 
 
 
 view :: [String] -> IO ()
@@ -128,8 +109,8 @@ view [fileName] = do
 view _ = incorrectArgs "view"
 
 
-remove :: [String] -> IO ()
-remove [fileName, numberString] = do
+remove' :: [String] -> IO ()
+remove' [fileName, numberString] = do
 	handle <- openFile fileName ReadMode
 	(tempName, tempHandle) <- openTempFile "." "temp"
 	contents <- hGetContents handle
@@ -141,4 +122,4 @@ remove [fileName, numberString] = do
 	hClose tempHandle
 	removeFile fileName
 	renameFile tempName fileName
-remove _ = incorrectArgs "remove"
+remove' _ = incorrectArgs "remove"
