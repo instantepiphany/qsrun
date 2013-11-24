@@ -1,4 +1,9 @@
-feh /home/jordan/Pictures/pics/IMG_20130721_204055.jpg
-echo second
-echo third
-echo fourth
+echo "first command"
+echo "second command"
+echo "third command"
+echo "fourth command"
+
+
+
+
+

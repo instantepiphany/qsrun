@@ -5,19 +5,11 @@ import System.Cmd
 import System.Environment
 import Data.Char
 import Data.List
+import Data.Either
 import qualified Graphics.UI.Gtk 
 --import Graphics.UI.Gtk.Glade
 
 {-
-main = do
-
-    withFile "commands.txt" ReadMode (\handle -> do
-        contents <- hGetContents handle
-        putStrLn contents
-        indice <- getChar
-        putStrLn (lines contents !! ((digitToInt indice) - 1))
-    	rawSystem (head $ words $ lines contents !! ((digitToInt indice) - 1)) (tail $ words $ lines contents !! ((digitToInt indice) - 1)))
-
 data GUI = GUI {
 	mainWin :: Window,
 	button1 :: Button,
@@ -32,12 +24,22 @@ data GUI = GUI {
 -}
 
 
-dispatch :: [(String, [String] -> IO ())]
-dispatch =  [ ("run", run)
-            , ("add", add)
-			, ("view", view)
-			, ("remove", remove)
-			]
+
+incorrectArgs :: String -> IO ()
+incorrectArgs "add" = do
+	putStrLn "Error: Incorrect syntax. Correct syntax is 'qsrun add filename command'"
+
+incorrectArgs "run" = do
+	putStrLn "Error: Incorrect syntax. Correct syntax is 'qsrun run filename $commandindex' - Find command index easily by doing 'qsrun view filename'."
+
+incorrectArgs "view" = do
+	putStrLn "Error: Incorrect syntax, correct syntax is 'qsrun view filename.txt'"
+
+incorrectArgs "remove" = do
+	putStrLn "Error: Incorrect syntax. Correct syntax is 'qsrun remove filename $commandindex' - Find command index easily by doing 'qsrun view filename'."
+
+incorrectArgs _ = do
+	putStrLn "Incorrect argument. Valid args are add/view/remove/run. Alternatively run without args for interactive mode."
 
 
 main = do
@@ -47,11 +49,15 @@ main = do
 
 dispatchInit = do
 	(command:args) <- getArgs
-	putStrLn "Command arguments must be supplied"
+	newExecute command args
 
-{-	let (Just action) = lookup command dispatch
-	action args-}
-                                                                                                
+
+newExecute "run" b = run b
+newExecute "add" b = add b
+newExecute "view" b = view b
+newExecute "remove" b = remove b
+newExecute _ b = incorrectArgs (show b)
+
 
 run :: [String] -> IO ()
 run [fileName, numberString] = do
@@ -59,20 +65,59 @@ run [fileName, numberString] = do
 	contents <- hGetContents handle
 	let qsScripts = lines contents
 	    runCommand = (qsScripts !! ((read numberString) - 1))
+	    command = (head $ words $ runCommand)
+	    args = (tail $ words $ runCommand)
+	
+	putStrLn "Executing: "
+	putStr runCommand
 	putStrLn ""
-	putStrLn "Executing: \n"
-	putStrLn runCommand
+	rawSystem command args
 	hClose handle
-
+run _ = incorrectArgs "run"
 
 interactive :: IO ()
 interactive = do
-	putStrLn "qsrun is running in interactive mode!"
+	putStrLn "qsrun is running in interactive mode! Ctrl-C to exit.\n"
+
+	
+	putStrLn "Choose an operation: add, view, remove or run.\n"
+	opName <- getLine
+
+	putStrLn "\nPlease enter a filename."
+	fileName <- getLine
+
+        let   add = do
+	         putStrLn ""
+	         view ([fileName])
+                 putStrLn "\nWhat do you want to add?"
+	         args <- getLine
+	         newExecute opName (fileName:[args])
+	      remove = do
+	         putStrLn "What do you want to remove?\n"
+		 view ([fileName]) 
+	         args <- getLine
+	         newExecute opName (fileName:[args])
+	      run = do
+	         view ([fileName]) 
+	         putStrLn "What do you want to run?"
+                 args <- getLine
+	         newExecute opName (fileName:[args])
+	  in
+	     case (opName) of
+	        "view"   -> view ([fileName])
+	        "add"    -> add
+		"remove" -> remove
+		"run"    -> run
 
 
+{-Separate else statements eg listing commands of file before choosing what to do-} 
+
+	
 
 add :: [String] -> IO ()
 add [fileName, qsItem] = appendFile fileName (qsItem ++ "\n")
+add _ = incorrectArgs "add" 
+
 
 view :: [String] -> IO ()
 view [fileName] = do
@@ -80,6 +125,7 @@ view [fileName] = do
 	let qsScripts = lines contents
 	    numberedScripts = zipWith (\n line -> show n ++ " - " ++ line) [1..] qsScripts
 	putStr $ unlines numberedScripts
+view _ = incorrectArgs "view"
 
 
 remove :: [String] -> IO ()
@@ -95,55 +141,4 @@ remove [fileName, numberString] = do
 	hClose tempHandle
 	removeFile fileName
 	renameFile tempName fileName
-
-
-
-{-
-
-	handle <- openFile "commands.txt" ReadMode
-	(tempName, tempHandle) <- openTempFile "." "temp"
-	contents <- hGetContents handle
-	putStrLn "\nCommands: \n"
-	putStrLn (contents ++ "\n")
-	putStr "Which command would you like to run? \n"
-	indice <- getChar
-	let command = (head $ words $ lines contents !! ((digitToInt indice) - 1))
-	    arguments = (tail $ words $ lines contents !! ((digitToInt indice) - 1))
-	
-	putStr command
-	putStr " "
-	putStrLn (show $ unwords arguments)
-	rawSystem command arguments
-	junk <- getChar
-	hClose handle
-	hClose tempHandle
---	renameFile tempName "junk"
-    
-    -- Cleanup
-	removeFile (drop 2 tempName)
-
-	
-
-	--rawSystem "ls" ["/home/jordan/"]
-    
--}
-
-{-
-main = do      
-    handle <- openFile "todo.txt" ReadMode
-    (tempName, tempHandle) <- openTempFile "." "temp"
-    contents <- hGetContents handle
-    let todoTasks = lines contents   
-        numberedTasks = zipWith (\n line -> show n ++ " - " ++ line) [0..] todoTasks   
-    putStrLn "These are your TO-DO items:"
-    putStr $ unlines numberedTasks
-    putStrLn "Which one do you want to delete?"   
-    numberString <- getLine   
-    let number = read numberString   
-        newTodoItems = delete (todoTasks !! number) todoTasks   
-    hPutStr tempHandle $ unlines newTodoItems
-    hClose handle
-    hClose tempHandle
-    removeFile "todo.txt"
-    renameFile tempName "todo.txt"\
--}
+remove _ = incorrectArgs "remove"
