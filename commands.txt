@@ -1,10 +1,9 @@
-echo "first command"
-echo "second command"
-echo "third command"
-echo "fourth command"
-echo "fifth command"
-echo "sixth command"
-workflowy
-test
-test
-test
+chromium
+wunderlist
+teamspeak3
+urxvt -e vim
+urxvt -e weechat-curses
+urxvt -e ranger
+urxvt -e sudo iftop -i wifi0
+urxvt -e sudo nethogs wifi0
+ario

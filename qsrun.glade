@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.16.0 on Thu Nov 28 21:02:41 2013 -->
+<!-- Generated with glade 3.16.0 on Fri Nov 29 02:41:37 2013 -->
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkWindow" id="mainWindow">
@@ -35,8 +35,6 @@
                 <property name="justify">center</property>
                 <property name="wrap">True</property>
                 <property name="wrap_mode">word-char</property>
-                <property name="ellipsize">end</property>
-                <property name="lines">3</property>
               </object>
             </child>
           </object>
@@ -62,8 +60,6 @@
                 <property name="justify">center</property>
                 <property name="wrap">True</property>
                 <property name="wrap_mode">word-char</property>
-                <property name="ellipsize">end</property>
-                <property name="lines">3</property>
               </object>
             </child>
           </object>
@@ -89,8 +85,6 @@
                 <property name="justify">center</property>
                 <property name="wrap">True</property>
                 <property name="wrap_mode">word-char</property>
-                <property name="ellipsize">end</property>
-                <property name="lines">3</property>
               </object>
             </child>
           </object>
@@ -116,8 +110,6 @@
                 <property name="justify">center</property>
                 <property name="wrap">True</property>
                 <property name="wrap_mode">word-char</property>
-                <property name="ellipsize">end</property>
-                <property name="lines">3</property>
               </object>
             </child>
           </object>
@@ -143,8 +135,6 @@
                 <property name="justify">center</property>
                 <property name="wrap">True</property>
                 <property name="wrap_mode">word-char</property>
-                <property name="ellipsize">end</property>
-                <property name="lines">3</property>
               </object>
             </child>
           </object>
@@ -170,8 +160,6 @@
                 <property name="justify">center</property>
                 <property name="wrap">True</property>
                 <property name="wrap_mode">word-char</property>
-                <property name="ellipsize">end</property>
-                <property name="lines">3</property>
               </object>
             </child>
           </object>
@@ -197,8 +185,6 @@
                 <property name="justify">center</property>
                 <property name="wrap">True</property>
                 <property name="wrap_mode">word-char</property>
-                <property name="ellipsize">end</property>
-                <property name="lines">3</property>
               </object>
             </child>
           </object>
@@ -224,8 +210,6 @@
                 <property name="justify">center</property>
                 <property name="wrap">True</property>
                 <property name="wrap_mode">word-char</property>
-                <property name="ellipsize">end</property>
-                <property name="lines">3</property>
               </object>
             </child>
           </object>
@@ -251,9 +235,7 @@
                 <property name="label" translatable="yes">Program 1</property>
                 <property name="justify">center</property>
                 <property name="wrap">True</property>
-                <property name="wrap_mode">word-char</property>
-                <property name="ellipsize">end</property>
-                <property name="lines">3</property>
+                <property name="wrap_mode">char</property>
               </object>
             </child>
           </object>
