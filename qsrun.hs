@@ -1,4 +1,5 @@
---module Qsrun where
+ --module Qsrun where
+{-# LANGUAGE RecursiveDo #-}
 import System.IO
 import System.Directory
 import System.Cmd
@@ -33,16 +34,17 @@ data GUI = GUI {
 	label7 :: Label,
 	label8 :: Label,
 	label9 :: Label}
+
 data SIGNAL = SIGNAL {
-        signal1 :: ConnectId Button,
-        signal2 :: ConnectId Button,
-        signal3 :: ConnectId Button,
-        signal4 :: ConnectId Button,
-        signal5 :: ConnectId Button,
-        signal6 :: ConnectId Button,
-        signal7 :: ConnectId Button,
-        signal8 :: ConnectId Button,
-        signal9 :: ConnectId Button}
+        signal1 :: IORef (IO (ConnectId Button)),
+        signal2 :: IORef (IO (ConnectId Button)),
+        signal3 :: IORef (IO (ConnectId Button)),
+        signal4 :: IORef (IO (ConnectId Button)),
+        signal5 :: IORef (IO (ConnectId Button)),
+        signal6 :: IORef (IO (ConnectId Button)),
+        signal7 :: IORef (IO (ConnectId Button)),
+        signal8 :: IORef (IO (ConnectId Button)),
+        signal9 :: IORef (IO (ConnectId Button))}
 
 
 
@@ -68,15 +70,17 @@ main = do
 	if null initArgs then modeGui
 		else dispatchInit
 
-configPath = getAppUserDataDirectory "config/qsrun/commands.txt" 
-gladePath = getAppUserDataDirectory "config/qsrun/qsrun.glade"
-configFolder = getAppUserDataDirectory "config/qsrun/"
+getDir = getAppUserDataDirectory
+
+configPath = getDir "config/qsrun/commands.txt" 
+gladePath = getDir "config/qsrun/qsrun.glade"
+configFolder = getDir "config/qsrun/"
 
 modeGui :: IO ()
 modeGui = do
         initGUI
 	gladefile <- gladePath
-        gui <- loadGui gladefile 
+  gui <- loadGui gladefile 
 	nodeinfo <- connectGui gui
 	nodeCheck nodeinfo gui
 	mainGUI
@@ -125,27 +129,19 @@ openCommands fileName = do
 -- Sets up onClicked events for commands.txt
 connectGui gui = do
        onDestroy (mainWin gui) mainQuit
-       signal1 <- onClicked (button1 gui) (run $ words "commands.txt 1 gui") 
-       signal2 <- onClicked (button2 gui) (run $ words "commands.txt 2 gui")
-       signal3 <- onClicked (button3 gui) (run $ words "commands.txt 3 gui")
-       signal4 <- onClicked (button4 gui) (run $ words "commands.txt 4 gui")
-       signal5 <- onClicked (button5 gui) (run $ words "commands.txt 5 gui")
-       signal6 <- onClicked (button6 gui) (run $ words "commands.txt 6 gui")
-       signal7 <- onClicked (button7 gui) (run $ words "commands.txt 7 gui")
-       signal8 <- onClicked (button8 gui) (run $ words "commands.txt 8 gui")
-       signal9 <- onClicked (button9 gui) (run $ words "commands.txt 9 gui")
+       signal1 <- newIORef (onClicked (button1 gui) (run $ words "commands.txt 1 gui"))
+       signal2 <- newIORef (onClicked (button2 gui) (run $ words "commands.txt 2 gui"))
+       signal3 <- newIORef (onClicked (button3 gui) (run $ words "commands.txt 3 gui"))
+       signal4 <- newIORef (onClicked (button4 gui) (run $ words "commands.txt 4 gui"))
+       signal5 <- newIORef (onClicked (button5 gui) (run $ words "commands.txt 5 gui"))
+       signal6 <- newIORef (onClicked (button6 gui) (run $ words "commands.txt 6 gui"))
+       signal7 <- newIORef (onClicked (button7 gui) (run $ words "commands.txt 7 gui"))
+       signal8 <- newIORef (onClicked (button8 gui) (run $ words "commands.txt 8 gui"))
+       signal9 <- newIORef (onClicked (button9 gui) (run $ words "commands.txt 9 gui"))
        return $ SIGNAL signal1 signal2 signal3 signal4 signal5 signal6 signal7 signal8 signal9   
 
 -- Checks each command and disconnects signals from nodes, and adds a new onClicked which sets up the new labels and onClickeds(nodeActivate)
 nodeCheck nodeinfo gui = do
-       {-handle <- openCommands-}
-       {-contents <- hGetContents handle-}
-       {-let qsScripts = lines contents-}
-	   {-runCommand = (qsScripts !! ((read numberString) - 1))-}
-	   {-command = (head $ words $ runCommand)-}
-	   {-args = (tail $ words $ runCommand)-}
-       {-case command of "node" -> nodeActivate ["testnode.txt"] gui-}
-                       {-_ -> return() --run [fileName, numberString, "gui"]-}
        nlabel1 <- labelGetLabel (label1 gui)
        nlabel2 <- labelGetLabel (label2 gui)
        nlabel3 <- labelGetLabel (label3 gui)
@@ -155,23 +151,96 @@ nodeCheck nodeinfo gui = do
        nlabel7 <- labelGetLabel (label7 gui)
        nlabel8 <- labelGetLabel (label8 gui)
        nlabel9 <- labelGetLabel (label9 gui)
-       case (head $ words nlabel1) of "node" -> signalDisconnect (signal1 nodeinfo) >> onClicked (button1 gui) (nodeActivate (tail $ words nlabel1) gui nodeinfo) 
-       case (head $ words nlabel2) of "node" -> signalDisconnect (signal2 nodeinfo) >> onClicked (button2 gui) (nodeActivate (tail $ words nlabel2) gui nodeinfo) 
-       case (head $ words nlabel3) of "node" -> signalDisconnect (signal3 nodeinfo) >> onClicked (button3 gui) (nodeActivate (tail $ words nlabel3) gui nodeinfo) 
-       case (head $ words nlabel4) of "node" -> signalDisconnect (signal4 nodeinfo) >> onClicked (button4 gui) (nodeActivate (tail $ words nlabel4) gui nodeinfo) 
-       case (head $ words nlabel5) of "node" -> signalDisconnect (signal5 nodeinfo) >> onClicked (button5 gui) (nodeActivate (tail $ words nlabel5) gui nodeinfo) 
-       case (head $ words nlabel6) of "node" -> signalDisconnect (signal6 nodeinfo) >> onClicked (button6 gui) (nodeActivate (tail $ words nlabel6) gui nodeinfo) 
-       case (head $ words nlabel7) of "node" -> signalDisconnect (signal7 nodeinfo) >> onClicked (button7 gui) (nodeActivate (tail $ words nlabel7) gui nodeinfo) 
-       case (head $ words nlabel8) of "node" -> signalDisconnect (signal8 nodeinfo) >> onClicked (button8 gui) (nodeActivate (tail $ words nlabel8) gui nodeinfo) 
-       case (head $ words nlabel9) of "node" -> signalDisconnect (signal9 nodeinfo) >> onClicked (button9 gui) (nodeActivate (tail $ words nlabel9) gui nodeinfo) 
+
+       {-[nlabel1,nlabel2,nlabel3,nlabel4,nlabel5,nlabel6,nlabel7,nlabel8,nlabel9] <- mapM (labelGetLabel) [label1 gui,label2 gui,label3 gui,label4 gui,label5 gui,label6 gui,label7 gui,label8 gui,label9 gui]-}
+       [signal1',signal2',signal3',signal4',signal5',signal6',signal7',signal8',signal9'] <- mapM (readIORef) [signal1 nodeinfo,signal2 nodeinfo,signal3 nodeinfo,signal4 nodeinfo,signal5 nodeinfo,signal6 nodeinfo,signal7 nodeinfo,signal8 nodeinfo,signal9 nodeinfo]
+
+       signal1'' <- signal1' 
+       signal2'' <- signal2' 
+       signal3'' <- signal3' 
+       signal4'' <- signal4' 
+       signal5'' <- signal5' 
+       signal6'' <- signal6' 
+       signal7'' <- signal7' 
+       signal8'' <- signal8' 
+       signal9'' <- signal9'
+       {-let discall = mapM signalDisconnect [signal1'',signal2'',signal3'',signal4'',signal5'',signal6'',signal7'',signal8'',signal9'']-}
+       discall nodeinfo
+       case (head $ words nlabel1) of "node" -> do 
+                                                  signalDisconnect signal1''
+						  writeIORef (signal1 nodeinfo) (onClicked (button1 gui) $ discall nodeinfo >> nodeActivate (tail $ words nlabel1) gui nodeinfo signal1'')
+						  testing1 <- readIORef (signal1 nodeinfo)
+						  testing1' <- testing1
+						  return()
+                                      _ -> return()
+       case (head $ words nlabel2) of "node" -> do 
+                                                  signalDisconnect signal2''
+						  writeIORef (signal2 nodeinfo) (onClicked (button2 gui) $ discall nodeinfo >> nodeActivate (tail $ words nlabel2) gui nodeinfo signal2'')
+						  testing2 <- readIORef (signal2 nodeinfo)
+						  testing2' <- testing2
+						  return()
+                                      _ -> return()
+       case (head $ words nlabel3) of "node" -> do 
+                                                  signalDisconnect signal3''
+						  writeIORef (signal3 nodeinfo) (onClicked (button3 gui) $ discall nodeinfo >> nodeActivate (tail $ words nlabel3) gui nodeinfo signal3'')
+						  testing3 <- readIORef (signal3 nodeinfo)
+						  testing3' <- testing3
+						  return()
+                                      _ -> return()
+       case (head $ words nlabel4) of "node" -> do 
+                                                  signalDisconnect signal4''
+						  writeIORef (signal4 nodeinfo) (onClicked (button4 gui) $ discall nodeinfo >> nodeActivate (tail $ words nlabel4) gui nodeinfo signal4'')
+						  testing4 <- readIORef (signal4 nodeinfo)
+						  testing4' <- testing4
+						  return()
+                                      _ -> return()
+       case (head $ words nlabel5) of "node" -> do 
+                                                  signalDisconnect signal5''
+						  writeIORef (signal5 nodeinfo) (onClicked (button5 gui) $ discall nodeinfo >> nodeActivate (tail $ words nlabel5) gui nodeinfo signal5'')
+						  testing5 <- readIORef (signal5 nodeinfo)
+						  testing5' <- testing5
+						  return()
+                                      _ -> return()
+       case (head $ words nlabel6) of "node" -> do 
+                                                  signalDisconnect signal6''
+						  writeIORef (signal6 nodeinfo) (onClicked (button6 gui) $ discall nodeinfo >> nodeActivate (tail $ words nlabel6) gui nodeinfo signal6'')
+						  testing6 <- readIORef (signal6 nodeinfo)
+						  testing6' <- testing6
+						  return()
+                                      _ -> return()
+       case (head $ words nlabel7) of "node" -> do 
+                                                  signalDisconnect signal7''
+						  writeIORef (signal7 nodeinfo) (onClicked (button7 gui) $ discall nodeinfo >> nodeActivate (tail $ words nlabel7) gui nodeinfo signal7'')
+						  testing7 <- readIORef (signal7 nodeinfo)
+						  testing7' <- testing7
+						  return()
+                                      _ -> return()
+       case (head $ words nlabel8) of "node" -> do 
+                                                  signalDisconnect signal8''
+						  writeIORef (signal8 nodeinfo) (onClicked (button8 gui) $ discall nodeinfo >> nodeActivate (tail $ words nlabel8) gui nodeinfo signal8'')
+						  testing8 <- readIORef (signal8 nodeinfo)
+						  testing8' <- testing8
+						  return()
+                                      _ -> return()
+       case (head $ words nlabel9) of "node" -> do 
+                                                  signalDisconnect signal9'' 
+						  writeIORef (signal9 nodeinfo) (onClicked (button9 gui) $ discall nodeinfo >> nodeActivate (tail $ words nlabel9) gui nodeinfo signal9'') 
+						  testing <- readIORef (signal9 nodeinfo)
+						  testing' <- testing
+						  return()
+                                      _ -> return()
+       discall nodeinfo
        return()
 
-       {-putStrLn command-}
-       {-putStrLn (unwords args)-}
+ 
 
+discall nodeinfo = do
+       test <- readIORef (signal1 nodeinfo)
+       test' <- test
+       signalDisconnect test'
 -- Sets labels and events to match contents of nodeFile
-nodeActivate :: [String] -> GUI -> SIGNAL -> IO ()
-nodeActivate [nodeFile] gui nodeinfo = do
+--nodeActivate :: [String] -> GUI -> SIGNAL -> IO ()
+nodeActivate [nodeFile] gui nodeinfo nsignal = do
        folder <- configFolder
        nodeFile' <- openFile (folder ++ nodeFile) ReadMode 
        contents <- hGetContents nodeFile'
@@ -184,31 +253,84 @@ nodeActivate [nodeFile] gui nodeinfo = do
        set (label7 gui) [labelText := lines contents !! 6]
        set (label8 gui) [labelText := lines contents !! 7]
        set (label9 gui) [labelText := lines contents !! 8]
-       mapM signalDisconnect [(signal1 nodeinfo),(signal2 nodeinfo),(signal3 nodeinfo),(signal4 nodeinfo),(signal5 nodeinfo),(signal6 nodeinfo),(signal7 nodeinfo),(signal8 nodeinfo),(signal9 nodeinfo)]
-       let qsScripts = lines contents
-       onClicked (button1 gui) (childNodeCheck nodeFile 1 gui nodeinfo)
-       onClicked (button2 gui) (childNodeCheck nodeFile 2 gui nodeinfo)
-       onClicked (button3 gui) (childNodeCheck nodeFile 3 gui nodeinfo)
-       onClicked (button4 gui) (childNodeCheck nodeFile 4 gui nodeinfo)
-       onClicked (button5 gui) (childNodeCheck nodeFile 5 gui nodeinfo)
-       onClicked (button6 gui) (childNodeCheck nodeFile 6 gui nodeinfo)
-       onClicked (button7 gui) (childNodeCheck nodeFile 7 gui nodeinfo)
-       onClicked (button8 gui) (childNodeCheck nodeFile 8 gui nodeinfo)
-       onClicked (button9 gui) (childNodeCheck nodeFile 9 gui nodeinfo)
 
-       return()
-       {-labelSetText (label1 gui) -}
+       [signal1',signal2',signal3',signal4',signal5',signal6',signal7',signal8',signal9'] <- mapM (readIORef) [signal1 nodeinfo,signal2 nodeinfo,signal3 nodeinfo,signal4 nodeinfo,signal5 nodeinfo,signal6 nodeinfo,signal7 nodeinfo,signal8 nodeinfo,signal9 nodeinfo]
 
-childNodeCheck nodeFile numberString gui nodeinfo = do
-       folder <- configFolder
-       nodeFile' <- openFile (folder ++ nodeFile) ReadMode 
-       contents <- hGetContents nodeFile'
-       let qsScripts = lines contents
-           first = head $ words (qsScripts !! (numberString - 1))
-           second = head $ tail $ words $ qsScripts !! (numberString - 1)
-       case first of "node" -> nodeActivate [second] gui nodeinfo     
-                     _ -> run [nodeFile,(show numberString),"gui"]
+       signal1'' <- signal1' 
+       signal2'' <- signal2' 
+       signal3'' <- signal3' 
+       signal4'' <- signal4' 
+       signal5'' <- signal5' 
+       signal6'' <- signal6' 
+       signal7'' <- signal7' 
+       signal8'' <- signal8' 
+       signal9'' <- signal9'
+
+
+
+       let discall = mapM signalDisconnect [signal1'',signal2'',signal3'',signal4'',signal5'',signal6'',signal7'',signal8'',signal9'']
+       discall
+
+       [lb1,lb2,lb3,lb4,lb5,lb6,lb7,lb8,lb9] <- mapM (labelGetText) [(label1 gui),(label2 gui),(label3 gui),(label4 gui),(label5 gui),(label6 gui),(label7 gui),(label8 gui),(label9 gui)]
+
+       {-case (tail x) of "node" -> signalDisconnect nSignal1-}
+       signalDisconnect nsignal
+       case (head $ words lb1) of "node" -> do 
+					      signalDisconnect signal1''
+                                              writeIORef (signal1 nodeinfo) $ onClicked (button1 gui) (nodeActivate (tail $ words lb1) gui nodeinfo nsignal)
+					      asdf <- readIORef (signal1 nodeinfo)
+					      signal1'' <- asdf
+					      return()
+				  _      -> do
+					      signalDisconnect signal1''
+				              writeIORef (signal1 nodeinfo) $ onClicked (button1 gui) (run $ words $ nodeFile ++ " 1 gui")
+					      asdf <- readIORef (signal1 nodeinfo)
+					      signal1'' <-  asdf
+					      return()
+       case (head $ words lb2) of "node" -> onClicked (button2 gui) (nodeActivate (tail $ words lb2) gui nodeinfo nsignal)
+				  _      -> onClicked (button2 gui) (run $ words $ nodeFile ++ " 2 gui")
+       case (head $ words lb3) of "node" -> onClicked (button3 gui) (nodeActivate (tail $ words lb3) gui nodeinfo nsignal)
+				  _      -> onClicked (button3 gui) (run $ words $ nodeFile ++ " 3 gui")
+       case (head $ words lb4) of "node" -> onClicked (button4 gui) (nodeActivate (tail $ words lb4) gui nodeinfo nsignal)
+				  _      -> onClicked (button4 gui) (run $ words $ nodeFile ++ " 4 gui")
+       case (head $ words lb5) of "node" -> onClicked (button5 gui) (nodeActivate (tail $ words lb5) gui nodeinfo nsignal)
+				  _      -> onClicked (button5 gui) (run $ words $ nodeFile ++ " 5 gui")
+       case (head $ words lb6) of "node" -> onClicked (button6 gui) (nodeActivate (tail $ words lb6) gui nodeinfo nsignal)
+				  _      -> onClicked (button6 gui) (run $ words $ nodeFile ++ " 6 gui")
+       case (head $ words lb7) of "node" -> onClicked (button7 gui) (nodeActivate (tail $ words lb7) gui nodeinfo nsignal)
+				  _      -> onClicked (button7 gui) (run $ words $ nodeFile ++ " 7 gui")
+       case (head $ words lb8) of "node" -> onClicked (button8 gui) $ do 
+                                                                        putStrLn "test"
+									discall
+									signalDisconnect signal1''
+									nodeActivate (tail $ words lb8) gui nodeinfo nsignal
+				  _      -> onClicked (button8 gui) (run $ words $ nodeFile ++ " 8 gui")
+       case (head $ words lb9) of "node" -> onClicked (button9 gui) (nodeActivate (tail $ words lb9) gui nodeinfo nsignal)
+                                  _      -> onClicked (button9 gui) (run $ words $ nodeFile ++ " 9 gui")
+       discall
+
+       {-onClicked (button2 gui) (childNodeCheck (head x) 2 gui nodeinfo)-}
+       {-onClicked (button3 gui) (childNodeCheck (head x) 3 gui nodeinfo)-}
+       {-onClicked (button4 gui) (childNodeCheck (head x) 4 gui nodeinfo)-}
+       {-onClicked (button5 gui) (childNodeCheck (head x) 5 gui nodeinfo)-}
+       {-onClicked (button6 gui) (childNodeCheck (head x) 6 gui nodeinfo)-}
+       {-onClicked (button7 gui) (childNodeCheck (head x) 7 gui nodeinfo)-}
+       {-onClicked (button8 gui) (childNodeCheck (head x) 8 gui nodeinfo)-}
+       {-onClicked (button9 gui) (childNodeCheck (head x) 9 gui nodeinfo)-}
+       labelGetText (label1 gui) >>= putStrLn
        return()
+
+{-childNodeCheck nodeFile numberString gui nodeinfo = do-}
+       {-folder <- configFolder-}
+       {-nodeFile' <- openFile (folder ++ nodeFile) ReadMode -}
+       {-contents <- hGetContents nodeFile'-}
+       {-let qsScripts = lines contents-}
+           {-first = head $ words (qsScripts !! (numberString - 1))-}
+           {-second = head $ tail $ words $ qsScripts !! (numberString - 1)-}
+       {-case first of "node" -> nodeActivate [second] gui nodeinfo     -}
+                     {-_ -> run [nodeFile,(show numberString),"gui"]-}
+       {-return()-}
+
 dispatchInit = do
        (command:args) <- getArgs
        newExecute command args
@@ -234,7 +356,7 @@ run [fileName, numberString] = do
        handle <- openCommands fileName
        contents <- hGetContents handle
        let qsScripts = lines contents
-	   runCommand = (qsScripts !! ((read numberString) - 1))
+	   runCommand = (qsScripts !! (read numberString - 1))
 	   command = (head $ words $ runCommand)
 	   args = (tail $ words $ runCommand)
        putStrLn "Executing: "
