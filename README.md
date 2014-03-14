@@ -3,7 +3,7 @@ qsrun
 
 -----
 
-####Version 0.2
+####Version 0.3
 
 
 
@@ -11,22 +11,24 @@ qsrun
 Lightweight mouse driven overlay for launching anything.
 
 qsrun is a lightweight launcher that uses a grid of 9 buttons to launch scripts or programs. 
-When run without any command line arguments, the GUI is used to control the program.
-If you want to use it in a shell, see below.
 
-```
-qsrun add filename command
-qsrun remove filename commandnumber
-qsrun view filename
-qsrun run filename commandnumber
-```
+The binary is included for those that don't want to install ghc and all required libraries just to run one program.
 
-Add and remove work as you would expect, remove takes a filename and a command number(which you can retrieve by doing `qsrun view filename`)  and removes it from the file.
-Run takes a filename and command number and runs the appropriate command in the given file. 
+After downloading and optionally compiling(install ghc and then run `ghc --make -threaded qsrun.hs`) , place both qsrun.glade and commands.txt into $HOME/.config/qsrun/. For most Linux systems this would be /home/username/.config/qsrun/.  
 
-####Setup
+Each line within commands.txt is treated as an entire command just like entering it in a shell. Only the first 9 lines will be displayed (as there are only 9 buttons), if you want to have more, then make one of the lines as follows: 
 
+`node filename.txt`
 
-After downloading and optionally compiling(install ghc and then run `ghc --make -threaded qsrun.hs`), place both qsrun.glade and commands.txt into $HOME/.config/qsrun/. For most Linux systems this would be /home/username/.config/qsrun/. You don't have to modify the commands.txt file using qsrun, you can use vi(m)/nano etc. Each line is treated as an entire command just like entering it in a shell. The first 9 lines are displayed on the 9 buttons in GUI mode, so any commands after that can only be accessed (for now) by using `qsrun run commands.txt 10`. 
+Where filename.txt is a file within $HOME/.config/qsrun/.
+When clicking on that button, it will replace all of the buttons with the commands from the new file. 
+For example, my commands.txt has the last two nodes as:
 
-Simply add the qsrun executable to your path (or run it however you like) and everything <i>should</i>work.
+`node dev.txt`
+and
+`node system.txt`
+
+Within dev.txt I have commands that are really scripts in my path that launch development environments for various projects. system.txt has commands like `sudo shutdown now`, `sudo pm-suspend` etc.
+
+Custom labels are partially supported, they show up properly but right now if you label a command (by changing `sudo shutdown now` to `Shutdown - sudo shutdown now`, which would then show up in qsrun as just "Shutdown"), it will not work when clicked.
+Simply add the qsrun executable to your path (or run it however you like) and everything <i>should</i> work.
