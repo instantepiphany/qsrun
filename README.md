@@ -3,7 +3,7 @@ qsrun
 
 -----
 
-####Version 0.3
+####Version 0.4
 
 
 
@@ -30,5 +30,5 @@ and
 
 Within dev.txt I have commands that are really scripts in my path that launch development environments for various projects. system.txt has commands like `sudo shutdown now`, `sudo pm-suspend` etc.
 
-Custom labels are partially supported, they show up properly but right now if you label a command (by changing `sudo shutdown now` to `Shutdown - sudo shutdown now`, which would then show up in qsrun as just "Shutdown"), it will not work when clicked.
-Simply add the qsrun executable to your path (or run it however you like) and everything <i>should</i> work.
+Custom labels work, just change use a `-` to show a label, e.g: `labelhere - command`.
+Simply add the qsrun executable to your path (or run it however you like) and everything should work.
